@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Transcript.Service": {
+      "commandName": "Project",
+      "commandLineArgs": "\"some path\""
+    }
+  }
+}

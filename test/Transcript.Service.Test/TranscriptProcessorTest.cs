@@ -1,6 +1,6 @@
 namespace Transcript.Service.Test
 {
-    public class UnitTest1
+    public class TranscriptProcessorTest
     {
         [Fact]
         public void Test1()

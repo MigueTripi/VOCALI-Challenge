@@ -1,11 +1,15 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Transcript.Service.Ioc;
+using Transcript.Service.Processors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Transcript.Service.Ioc;
-using Transcript.Service.Processors;
+using Microsoft.Extensions.Configuration;
 
+using IHost host = Host.CreateDefaultBuilder(args)
+    .ConfigureServices((_, services) =>
+        services.BindBusiness())
+    .Build();
 
-var serviceScope = ConfigureAppIoC();
+using IServiceScope serviceScope = host.Services.CreateScope();
 ConfigureAppSettings();
 
 IServiceProvider provider = serviceScope.ServiceProvider;
@@ -13,17 +17,15 @@ IServiceProvider provider = serviceScope.ServiceProvider;
 var transcriptProcessor = provider.GetRequiredService<ITranscriptProcessor>();
 
 
-List<string> list = new List<string>();
+var transcriptResult = transcriptProcessor.ProcessVoiceFiles(args[0]).Result;
 
-
-IServiceScope ConfigureAppIoC()
+if (transcriptResult)
 {
-    using IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((_, services) =>
-        services.BindBusiness())
-    .Build();
-
-    return host.Services.CreateScope();
+    Console.WriteLine("Transcript finished");
+}
+else
+{
+    Console.WriteLine(transcriptResult);
 }
 
 void ConfigureAppSettings()
@@ -33,8 +35,4 @@ void ConfigureAppSettings()
        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
     IConfiguration config = builder.Build();
-
-    var batchSize = config["BatchSize"];
-
-    Console.WriteLine($"Batch Size {batchSize}");
 }

@@ -1,12 +1,14 @@
 ﻿
 namespace Transcript.Service.Processors
 {
+    using Transcript.Service.Helpers;
     using Transcript.Service.Interfaces;
 
-    internal class TranscriptProcessor : ITranscriptProcessor
+    public class TranscriptProcessor : ITranscriptProcessor
     {
         private readonly IConfigurationHelper configurationHelper;
         private readonly IInvoxService InvoxService;
+        private readonly IFileHelper FileHelper;
         private int TranscriptRetries => configurationHelper.GetConfigValueWithDefault("TranscriptRetries", 3);
 
         /// <summary>
@@ -14,17 +16,18 @@ namespace Transcript.Service.Processors
         /// </summary>
         /// <param name="configHelper">To manage app settings</param>
         /// <param name="invoxService">Service to ask the transcriptions</param>
-        public TranscriptProcessor(IConfigurationHelper configHelper, IInvoxService invoxService) 
+        public TranscriptProcessor(IConfigurationHelper configHelper, IInvoxService invoxService, IFileHelper fileHelper) 
         {
             configurationHelper = configHelper;
             InvoxService = invoxService;
+            FileHelper = fileHelper;
         }
 
         /// <inheritdoc />
         public async Task<bool> ProcessVoiceFiles(string path)
         {
 
-            string[] filesToProcess = this.GetFilesToProcess(path, "*.mp3");
+            string[] filesToProcess = FileHelper.GetFilesAtDirectory(path, "*.mp3");
             var batchSize = configurationHelper.GetConfigValueWithDefault("BatchSize", 3);
 
             await this.InternalProcessVoiceFilesAsync(filesToProcess, batchSize);
@@ -38,7 +41,7 @@ namespace Transcript.Service.Processors
         /// <param name="filesToProcess"> all the file names we have to transcript</param>
         /// <param name="batchSize">How many request at the same time we can process</param>
         /// <returns></returns>
-        private async Task InternalProcessVoiceFilesAsync(string[] filesToProcess, int batchSize)
+        public async Task InternalProcessVoiceFilesAsync(string[] filesToProcess, int batchSize)
         {
             var semaphore = new SemaphoreSlim(batchSize);
 
@@ -76,10 +79,8 @@ namespace Transcript.Service.Processors
         /// </summary>
         /// <param name="fileName">file to transcript</param>
         /// <param name="tryNumber">current retry number</param>
-        /// <returns></returns>
-        private async Task ProcessAudioFile(string fileName, int tryNumber)
+        public virtual async Task ProcessAudioFile(string fileName, int tryNumber)
         {
-            var transcriptRetries = configurationHelper.GetConfigValueWithDefault("TranscriptRetries", 3);
             byte[] fileContent = [];
             try
             {
@@ -95,29 +96,7 @@ namespace Transcript.Service.Processors
                 }
             }
 
-            var newFileName = fileName.Replace("mp3", "txt");
-            await File.WriteAllBytesAsync(newFileName, fileContent);
-        }
-        
-        /// <summary>
-        /// Retrieve the files we need to process
-        /// </summary>
-        /// <param name="path"> Directory where to find the files</param>
-        /// <param name="searchCriteria">filter the files in the directory (mp3 in our case)</param>
-        /// <returns>file names to process</returns>
-        private string[] GetFilesToProcess(string path, string searchCriteria)
-        {
-            try
-            {
-                string[] files = Directory.GetFiles(path, searchCriteria);
-                Console.WriteLine($"There are {files.Length} files with this search criteria {searchCriteria} at path {path}.");
-                return files;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error trying to read fields ot path {path}. SearchCriteria: {searchCriteria}. Error details: {e.Message}");
-                throw;
-            }
+            await FileHelper.Save(fileName.Replace("mp3", "txt"), fileContent);
         }
     }
 }

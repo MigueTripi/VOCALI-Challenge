@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Transcript.Service.Interfaces
 {
-    internal interface IConfigurationHelper
+    public interface IConfigurationHelper
     {
         int GetConfigValueWithDefault(string key, int defaultValue);
     }

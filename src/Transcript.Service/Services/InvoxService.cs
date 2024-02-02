@@ -1,21 +1,23 @@
 ﻿namespace Transcript.Service.Services
 {
     using Transcript.Service.Interfaces;
-    internal class InvoxService : IInvoxService
+    public class InvoxService : IInvoxService
     {
         private readonly IConfigurationHelper configurationHelper;
+        private readonly IFileHelper FileHelper;
         
-        private int SuccessRequests;
         private int ReadFileCount;
         private Dictionary<int, string> MockFiles = new Dictionary<int, string>();
+        public int SuccessRequests;
 
-        public InvoxService(IConfigurationHelper configHelper)
+        public InvoxService(IConfigurationHelper configHelper, IFileHelper fileHelper)
         {
             configurationHelper = configHelper;
+            FileHelper = fileHelper;
             InitializeMockFiles();
         }
 
-        public Task<byte[]> TranscriptVoiceFile(string voiceFile)
+        public virtual Task<byte[]> TranscriptVoiceFile(string voiceFile)
         {
             if (this.ShouldThrowError())
             {
@@ -23,7 +25,7 @@
                 throw new Exception("Exception due to 5% of failure rate has been reached");
             }
 
-            var result = GetTranscriptContent();
+            var result = GetTranscriptContent(voiceFile);
             this.SuccessRequests++;
             return Task.FromResult(result);
         }
@@ -41,17 +43,17 @@
         /// Retrieve mocked file content
         /// </summary>
         /// <returns>File content</returns>
-        private byte[] GetTranscriptContent()
+        private byte[] GetTranscriptContent(string voiceFile)
         {
-            var path = this.GetNextFileName();
+            var fileName = this.GetNextFileName();
             try
             {
-                Console.WriteLine($"*** Reading file {path} content....");
-                return File.ReadAllBytes(path);
+                Console.WriteLine($"*** Reading file {fileName} content....");
+                return this.FileHelper.GetFileContent(fileName);
             }
             catch
             {
-                Console.WriteLine($"Error when reading file content of {path}");
+                Console.WriteLine($"Error when reading file content of {fileName}");
                 throw;
             }
         }
@@ -63,7 +65,7 @@
         {
             try
             {
-                string[] files = Directory.GetFiles(".\\MockData", "*.txt");
+                string[] files = this.FileHelper.GetFilesAtDirectory(".\\MockData", "*.txt");
                 for (int i = 0; i < files.Length; i++)
                 {
                     MockFiles.Add(i, files[i]);

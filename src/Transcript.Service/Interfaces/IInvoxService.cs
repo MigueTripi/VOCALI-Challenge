@@ -1,6 +1,6 @@
 ﻿namespace Transcript.Service.Interfaces
 {
-    internal interface IInvoxService
+    public interface IInvoxService
     {
         /// <summary>
         /// Process provided voice file and return a mocked content

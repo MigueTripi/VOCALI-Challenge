@@ -21,6 +21,9 @@
     <None Update="AudioExamples\AudioToProcess_10.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="AudioExamples\AudioToProcess_11.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="AudioExamples\AudioToProcess_2.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

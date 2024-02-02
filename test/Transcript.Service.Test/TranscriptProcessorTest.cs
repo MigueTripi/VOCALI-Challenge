@@ -44,6 +44,7 @@ namespace Transcript.Service.Test
             configurationHelper.Setup(x => x.GetConfigValueWithDefault(It.IsAny<string>(), It.IsAny<int>())).Returns(3);
             FileHelper.Setup(x => x.GetFilesAtDirectory(It.IsAny<string>(), It.IsAny<string>())).Returns(() => ["file1.txt"]);
             FileHelper.Setup(x => x.Save(It.IsAny<string>(), It.IsAny<byte[]>()));
+            FileHelper.Setup(x => x.GetFileSize(It.IsAny<string>())).Returns(100000);
             InvoxService.Setup(x => x.TranscriptVoiceFile(It.IsAny<string>())).Returns(Task.FromResult(new byte[1]));
 
             await transcriptProcessor.ProcessVoiceFiles("");
@@ -57,10 +58,37 @@ namespace Transcript.Service.Test
             configurationHelper.Setup(x => x.GetConfigValueWithDefault(It.IsAny<string>(), It.IsAny<int>())).Returns(3);
             FileHelper.Setup(x => x.GetFilesAtDirectory(It.IsAny<string>(), It.IsAny<string>())).Returns(() => ["file1.txt"]);
             FileHelper.Setup(x => x.Save(It.IsAny<string>(), It.IsAny<byte[]>()));
+            FileHelper.Setup(x => x.GetFileSize(It.IsAny<string>())).Returns(100000);
             InvoxService.Setup(x => x.TranscriptVoiceFile(It.IsAny<string>())).Throws(() => new Exception("Some exception"));
 
             await transcriptProcessor.ProcessVoiceFiles("");
             configurationHelper.Verify(x => x.GetConfigValueWithDefault("TranscriptRetries", It.IsAny<int>()), Times.Exactly(3));
+        }
+
+        [Fact]
+        public async Task ProcessAudioFile_WhenFileSizeIsWrong_TheProcessDontSendIt()
+        {
+
+            configurationHelper.Setup(x => x.GetConfigValueWithDefault(It.IsAny<string>(), It.IsAny<int>())).Returns(3);
+            FileHelper.Setup(x => x.GetFilesAtDirectory(It.IsAny<string>(), It.IsAny<string>())).Returns(() => ["file1.mp3"]);
+            FileHelper.Setup(x => x.GetFileSize(It.IsAny<string>())).Returns(10);
+            InvoxService.Setup(x => x.TranscriptVoiceFile(It.IsAny<string>())).Returns(Task.FromResult(new byte[1]));
+
+            await transcriptProcessor.ProcessVoiceFiles("");
+            InvoxService.Verify(x => x.TranscriptVoiceFile(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task ProcessAudioFile_WhenFileSizeIsCorrect_TheProcessSendIt()
+        {
+
+            configurationHelper.Setup(x => x.GetConfigValueWithDefault(It.IsAny<string>(), It.IsAny<int>())).Returns(3);
+            FileHelper.Setup(x => x.GetFilesAtDirectory(It.IsAny<string>(), It.IsAny<string>())).Returns(() => ["file1.mp3"]);
+            FileHelper.Setup(x => x.GetFileSize(It.IsAny<string>())).Returns(100000);
+            InvoxService.Setup(x => x.TranscriptVoiceFile(It.IsAny<string>())).Returns(Task.FromResult(new byte[1]));
+
+            await transcriptProcessor.ProcessVoiceFiles("");
+            InvoxService.Verify(x => x.TranscriptVoiceFile(It.IsAny<string>()), Times.Once);
         }
     }
 }

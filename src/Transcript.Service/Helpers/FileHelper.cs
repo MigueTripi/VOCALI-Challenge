@@ -3,7 +3,7 @@ using Transcript.Service.Interfaces;
 
 namespace Transcript.Service.Helpers
 {
-    public class FileHelper: IFileHelper
+    public class FileHelper : IFileHelper
     {
         /// <inheritdoc />
         public virtual string[] GetFilesAtDirectory(string path, string searchCriteria)
@@ -30,7 +30,22 @@ namespace Transcript.Service.Helpers
         /// <inheritdoc />
         public virtual byte[] GetFileContent(string fileName)
         {
-            return File.ReadAllBytes(fileName);
+            byte[] result = [];
+            if (File.Exists(fileName))
+            {
+                result = File.ReadAllBytes(fileName);
+            }
+            return result;
+        }
+
+        public virtual long GetFileSize(string fileName)
+        {
+            long result = 0;
+            if (File.Exists(fileName))
+            {
+                result = File.Open(fileName, FileMode.Open).Length;
+            }
+            return result;
         }
     }
 }

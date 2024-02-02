@@ -49,6 +49,13 @@ namespace Transcript.Service.Processors
 
             foreach (var fileToProcess in filesToProcess)
             {
+
+                if (!this.IsValidFile(fileToProcess))
+                {
+                    Console.WriteLine($"File skipped due to is not valid. {fileToProcess}");
+                    continue;
+                }
+
                 // Wait for a slot to become available in the semaphore
                 await semaphore.WaitAsync();
 
@@ -72,6 +79,12 @@ namespace Transcript.Service.Processors
 
             // Wait for any remaining tasks to complete
             await Task.WhenAll(tasks);
+        }
+
+        private bool IsValidFile(string fileToProcess)
+        {
+            var fileSize = this.FileHelper.GetFileSize(fileToProcess);
+            return fileSize > 50000 && fileSize < 3000000;
         }
 
         /// <summary>

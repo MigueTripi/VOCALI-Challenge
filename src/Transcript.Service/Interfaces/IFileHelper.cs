@@ -24,5 +24,11 @@
         /// <returns>file content</returns>
         byte[] GetFileContent(string fileName);
 
+        /// <summary>
+        /// return the file size
+        /// </summary>
+        /// <param name="fileName">file to retrieve size</param>
+        /// <returns>number of bytes</returns>
+        long GetFileSize(string fileName);
     }
 }

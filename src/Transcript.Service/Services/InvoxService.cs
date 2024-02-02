@@ -3,16 +3,14 @@
     using Transcript.Service.Interfaces;
     public class InvoxService : IInvoxService
     {
-        private readonly IConfigurationHelper configurationHelper;
         private readonly IFileHelper FileHelper;
         
         private int ReadFileCount;
         private Dictionary<int, string> MockFiles = new Dictionary<int, string>();
         public int SuccessRequests;
 
-        public InvoxService(IConfigurationHelper configHelper, IFileHelper fileHelper)
+        public InvoxService(IFileHelper fileHelper)
         {
-            configurationHelper = configHelper;
             FileHelper = fileHelper;
             InitializeMockFiles();
         }

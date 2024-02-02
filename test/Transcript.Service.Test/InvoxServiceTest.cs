@@ -19,7 +19,7 @@ namespace Transcript.Service.Test
             configurationHelper = new Mock<ConfigurationHelper>(configuration.Object);
             FileHelper.Setup(x => x.GetFilesAtDirectory(It.IsAny<string>(), It.IsAny<string>())).Returns(() => ["file1.txt", "file2.txt"]);
 
-            InvoxService = new InvoxService(configurationHelper.Object, FileHelper.Object);
+            InvoxService = new InvoxService(FileHelper.Object);
         }
 
         [Fact]

@@ -18,7 +18,7 @@ namespace Transcript.Service.Test
         public TranscriptProcessorTest()
         {
             configurationHelper = new Mock<ConfigurationHelper>(configuration.Object);
-            InvoxService = new Mock<InvoxService>(configurationHelper.Object, FileHelper.Object);
+            InvoxService = new Mock<InvoxService>(FileHelper.Object);
             transcriptProcessor = new TranscriptProcessor(configurationHelper.Object, InvoxService.Object, FileHelper.Object);
         }
 
